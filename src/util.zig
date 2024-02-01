@@ -106,7 +106,7 @@ const StreamFile = struct {
     }
 };
 
-test "it can run code on a file" {
+test "it can stream from a file" {
     const fpath = "./testdata/random.file";
     const allocator = std.testing.allocator;
 
