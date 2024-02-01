@@ -24,6 +24,12 @@ pub fn firstArg(allocator: std.mem.Allocator) ![]const u8 {
     return Errors.NoFilepath;
 }
 
+test "it reads the first arg" {
+    const first_arg = try firstArg(std.testing.allocator);
+    const want = "--listen=-"; // on tests at least this is the argument
+    try std.testing.expectEqualStrings(want, first_arg);
+}
+
 // absFilePath
 // TODO: support expanding path (e.g: ~/), don't fall over when path doesn't exist.
 // TODO: should only allocate a new buffer if size is smaller.
@@ -41,22 +47,22 @@ fn absPath(allocator: std.mem.Allocator, fpath: []const u8) ![]u8 {
     return fpath_buf;
 }
 
-test "it parses the path" {
+// we're mostly wrapping around std.fs.realpath so just making sure the wrapper
+// doesn't leak.
+test "absPath doesn't leak" {
     const fpath = "./";
     const allocator = std.testing.allocator;
     const abspath = try absPath(allocator, fpath);
     defer allocator.free(abspath);
-
-    std.debug.print("abspath: {s}\n", .{abspath});
 }
 
-const StreamFileOpts = struct {
+const FileStreamerOpts = struct {
     allocator: std.mem.Allocator,
     chunk_size: usize,
     fpath: []const u8,
 };
 
-const StreamFile = struct {
+pub const FileStreamer = struct {
     allocator: std.mem.Allocator,
     chunk_size: usize,
     buf: []u8,
@@ -64,7 +70,7 @@ const StreamFile = struct {
     pos: usize = 0,
     fsize: usize = 0,
 
-    fn init(opts: StreamFileOpts) !StreamFile {
+    pub fn init(opts: FileStreamerOpts) !FileStreamer {
         if (opts.chunk_size == 0) {
             return error.ChunkSizeError;
         }
@@ -77,7 +83,7 @@ const StreamFile = struct {
 
         const fsize = (try file.stat()).size;
 
-        return StreamFile{
+        return FileStreamer{
             .chunk_size = opts.chunk_size,
             .allocator = opts.allocator,
             .file = file,
@@ -86,12 +92,12 @@ const StreamFile = struct {
         };
     }
 
-    fn deinit(self: *StreamFile) void {
+    pub fn deinit(self: *FileStreamer) void {
         self.allocator.free(self.buf);
         self.file.close();
     }
 
-    fn next(self: *StreamFile) !?[]u8 {
+    pub fn next(self: *FileStreamer) !?[]u8 {
         if (self.pos >= self.fsize) {
             return null;
         }
@@ -114,7 +120,7 @@ test "it can stream from a file" {
     defer allocator.free(abspath);
 
     var total: u64 = 0;
-    var sf = try StreamFile.init(.{
+    var sf = try FileStreamer.init(.{
         .fpath = fpath,
         .chunk_size = 1024,
         .allocator = allocator,
