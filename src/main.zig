@@ -1,11 +1,7 @@
 const std = @import("std");
-const time = std.time;
 const util = @import("./util.zig");
 const entropy = @import("./entropy.zig");
 const formatter = @import("./formatter.zig");
-
-const Instant = time.Instant;
-const Timer = time.Timer;
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
