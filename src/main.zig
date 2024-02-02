@@ -18,7 +18,7 @@ pub fn main() !void {
     var streamer = try util.FileStreamer.init(.{
         .fpath = first_arg,
         .allocator = allocator,
-        .chunk_size = 100 * 1024 * 1024,
+        .chunk_size = 10 * 1024,
     });
     defer streamer.deinit();
 
