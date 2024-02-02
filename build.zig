@@ -8,6 +8,8 @@ const lib = struct {
 
 const libs: []const lib = &.{
     .{ .name = "entropy", .path = "src/entropy.zig" },
+    .{ .name = "formatter", .path = "src/formatter.zig" },
+    .{ .name = "strings", .path = "src/strings.zig" },
     .{ .name = "util", .path = "src/util.zig" },
 };
 
