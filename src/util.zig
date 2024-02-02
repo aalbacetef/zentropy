@@ -108,14 +108,26 @@ pub const FileStreamer = struct {
         }
 
         self.pos += bytes_read;
-        return self.buf;
+        return self.buf[0..bytes_read];
     }
 };
 
-test "it can stream from a file" {
-    const fpath = "./testdata/random.file";
-    const allocator = std.testing.allocator;
+test "correctly reads bytes" {
+    const cases = [_]struct {
+        file: []const u8,
+        size: usize,
+    }{
+        .{ .file = "testdata/random.file", .size = 65536 },
+        .{ .file = "testdata/only.same.byte.file", .size = 777 },
+        .{ .file = "testdata/only.same.byte.file.gz", .size = 48 },
+    };
 
+    for (cases) |c| {
+        try testSize(std.testing.allocator, c.file, c.size);
+    }
+}
+
+fn testSize(allocator: std.mem.Allocator, fpath: []const u8, want: usize) !void {
     const abspath = try absPath(allocator, fpath);
     defer allocator.free(abspath);
 
@@ -131,6 +143,5 @@ test "it can stream from a file" {
         total += bytes.len;
     }
 
-    const want = 65536; // file size in bytes
     try std.testing.expectEqual(want, total);
 }
