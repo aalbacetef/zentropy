@@ -118,8 +118,8 @@ test "correctly reads bytes" {
         size: usize,
     }{
         .{ .file = "testdata/random.file", .size = 65536 },
-        .{ .file = "testdata/only.same.byte.file", .size = 777 },
-        .{ .file = "testdata/only.same.byte.file.gz", .size = 48 },
+        .{ .file = "testdata/deadbeef.file", .size = 777 },
+        .{ .file = "testdata/deadbeef.file.gz", .size = 45 },
     };
 
     for (cases) |c| {
