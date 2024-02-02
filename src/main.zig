@@ -2,6 +2,7 @@ const std = @import("std");
 const time = std.time;
 const util = @import("./util.zig");
 const entropy = @import("./entropy.zig");
+const formatter = @import("./formatter.zig");
 
 const Instant = time.Instant;
 const Timer = time.Timer;
@@ -32,30 +33,19 @@ pub fn main() !void {
     }
 
     const ent = entropy.calculate(h);
-
-    const fsize_unit = switch (std.math.log2(h.total)) {
-        0...9 => prefixes.bytes,
-        10...19 => prefixes.kb,
-        20...39 => prefixes.mb,
-        else => prefixes.gb,
-    };
-
     const fsize: f64 = @floatFromInt(h.total);
-    const file_size = switch (fsize_unit) {
-        .bytes => fsize,
-        .kb => fsize / 1024.0 / 1024.0,
-        .mb => fsize / 1024.0 / 1024.0 / 1024.0,
-        .gb => fsize / 1024.0 / 1024.0 / 1024.0 / 1024.0,
-    };
+    const possible = fsize * ent;
+    const compr = 100.0 * (1.0 - ent);
 
-    const possible_fsize = file_size / ent;
-    const unit: [1]u8 = [_]u8{@intFromEnum(fsize_unit)};
+    const logger = formatter.Logger{ .allocator = allocator };
 
-    std.debug.print("|zentropy|\n", .{});
-    std.debug.print("---------\n", .{});
-    std.debug.print("entropy: {d.4}\n", .{ent});
-    std.debug.print("file size: {d.2}{s}\n", .{ file_size, unit });
-    std.debug.print("possible file size: {d.2}{s}\n", .{ possible_fsize, unit });
+    const w = std.io.getStdOut().writer();
+    try logger.banner(w, "zentropy", .{});
+
+    try logger.printFloat(w, "entropy", ent, "nats");
+    try logger.printValue(w, "file size", fsize);
+    try logger.printValue(w, "possible file size", possible);
+    try logger.printFloat(w, "compression", compr, "%");
 }
 
 const sizes = enum(u64) {
@@ -71,3 +61,25 @@ const prefixes = enum(u8) {
     mb = 'M',
     gb = 'G',
 };
+
+test "it calculates file entropy correctly" {
+    const want: f64 = 1.0;
+
+    var streamer = try util.FileStreamer.init(.{
+        .allocator = std.testing.allocator,
+        .fpath = "testdata/random.file",
+        .chunk_size = 1024,
+    });
+    defer streamer.deinit();
+
+    var h = entropy.Histogram{ .data = [_]u64{0} ** 256 };
+    while (try streamer.next()) |bytes| {
+        h.munch(bytes);
+    }
+
+    const wantBytes = 65536;
+    try std.testing.expectEqual(wantBytes, h.total);
+
+    const ent = entropy.calculate(h);
+    try std.testing.expectApproxEqRel(want, ent, 0.001);
+}
