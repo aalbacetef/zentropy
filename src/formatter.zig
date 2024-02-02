@@ -33,7 +33,7 @@ test "it suffixes correctly" {
     };
 
     for (cases) |c| {
-        const want: []const u8 = c.entry;
+        const want = c.index;
         const got = findSuffix(c.v);
 
         try std.testing.expectEqual(want, got);
@@ -166,4 +166,6 @@ test "it prints a banner" {
             },
         },
     );
+
+    try std.testing.expectEqualStrings(want, buf);
 }
