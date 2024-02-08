@@ -59,23 +59,32 @@ const prefixes = enum(u8) {
 };
 
 test "it calculates file entropy correctly" {
-    const want: f64 = 1.0;
+    const testCases = [_]struct {
+        want: f64,
+        size: usize,
+        fpath: []const u8,
+    }{
+        .{ .want = 1.0, .size = 65536, .fpath = "testdata/random.file" },
+        .{ .want = 0.25, .size = 777, .fpath = "testdata/deadbeef.file" },
+        .{ .want = 0.60, .size = 45, .fpath = "testdata/deadbeef.file.gz" },
+    };
 
-    var streamer = try util.FileStreamer.init(.{
-        .allocator = std.testing.allocator,
-        .fpath = "testdata/random.file",
-        .chunk_size = 1024,
-    });
-    defer streamer.deinit();
+    for (testCases) |c| {
+        var streamer = try util.FileStreamer.init(.{
+            .allocator = std.testing.allocator,
+            .fpath = c.fpath,
+            .chunk_size = 1024,
+        });
+        defer streamer.deinit();
 
-    var h = entropy.Histogram{ .data = [_]u64{0} ** 256 };
-    while (try streamer.next()) |bytes| {
-        h.munch(bytes);
+        var h = entropy.Histogram{ .data = [_]u64{0} ** 256 };
+        while (try streamer.next()) |bytes| {
+            h.munch(bytes);
+        }
+
+        try std.testing.expectEqual(c.size, h.total);
+
+        const ent = entropy.calculate(h);
+        try std.testing.expectApproxEqRel(c.want, ent, 0.001);
     }
-
-    const wantBytes = 65536;
-    try std.testing.expectEqual(wantBytes, h.total);
-
-    const ent = entropy.calculate(h);
-    try std.testing.expectApproxEqRel(want, ent, 0.001);
 }
