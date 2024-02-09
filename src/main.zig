@@ -14,7 +14,12 @@ pub fn main() !void {
         }
     }
 
-    const first_arg = try util.firstArg(allocator);
+    const first_arg = try util.firstArg(allocator) orelse {
+        std.debug.print("please provide a path\n", .{});
+        return;
+    };
+    defer allocator.free(first_arg);
+
     var streamer = try util.FileStreamer.init(.{
         .fpath = first_arg,
         .allocator = allocator,

@@ -6,7 +6,7 @@ pub const Errors = error{
 };
 
 // firstArg will return the first argument, skipping arg0 (the program name).
-pub fn firstArg(allocator: std.mem.Allocator) ![]const u8 {
+pub fn firstArg(allocator: std.mem.Allocator) !?[]u8 {
     var args = std.process.argsWithAllocator(allocator) catch |err| return err;
     defer args.deinit();
 
@@ -18,14 +18,17 @@ pub fn firstArg(allocator: std.mem.Allocator) ![]const u8 {
             return Errors.UnexpectedEmpty;
         }
 
-        return arg;
+        var buf = try allocator.alloc(u8, arg.len);
+        @memcpy(buf, arg);
+        return buf;
     }
 
     return Errors.NoFilepath;
 }
 
 test "it reads the first arg" {
-    const first_arg = try firstArg(std.testing.allocator);
+    const first_arg = (try firstArg(std.testing.allocator)).?;
+    defer std.testing.allocator.free(first_arg);
     const want = "--listen=-"; // on tests at least this is the argument
     try std.testing.expectEqualStrings(want, first_arg);
 }
@@ -44,6 +47,7 @@ fn absPath(allocator: std.mem.Allocator, fpath: []const u8) ![]u8 {
     for (0.., abspath) |k, byte| {
         fpath_buf[k] = byte;
     }
+
     return fpath_buf;
 }
 
