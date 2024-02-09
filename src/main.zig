@@ -65,6 +65,7 @@ fn run(allocator: std.mem.Allocator) !void {
     try logger.banner(w, "zentropy", .{});
 
     try logger.printFloat(w, "entropy", ent, "nats");
+    try logger.printFloat(w, "entropy (bits)", ent * 8.0, "bits");
     try logger.printValue(w, "file size", fsize);
     try logger.printValue(w, "possible file size", possible);
     try logger.printFloat(w, "compression", compr, "%");
@@ -99,20 +100,6 @@ fn printHelp() void {
         \\ 
     , .{});
 }
-
-const sizes = enum(u64) {
-    bytes = 10,
-    kb = 20,
-    mb = 30,
-    gb = 40,
-};
-
-const prefixes = enum(u8) {
-    bytes = ' ',
-    kb = 'K',
-    mb = 'M',
-    gb = 'G',
-};
 
 test "it calculates file entropy correctly" {
     const testCases = [_]struct {
