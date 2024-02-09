@@ -74,6 +74,7 @@ fn isHelp(s: []u8) bool {
     const possible = [_][]const u8{
         "-h",
         "--help",
+        "h",
         "help",
     };
 
