@@ -18,7 +18,7 @@ pub fn firstArg(allocator: std.mem.Allocator) !?[]u8 {
             return Errors.UnexpectedEmpty;
         }
 
-        var buf = try allocator.alloc(u8, arg.len);
+        const buf = try allocator.alloc(u8, arg.len);
         @memcpy(buf, arg);
         return buf;
     }
