@@ -26,9 +26,9 @@ jobs:
       - run: zig build -Doptimize=Debug
 
       - name: run against testdata
-        if: ${{ matrix.os }} != 'windows-latest'
+        if: matrix.os != 'windows-latest'
         run: zig-out/bin/zentropy ./testdata/random.file
 
       - name: run against testdata
-        if: ${{ matrix.os }} == 'windows-latest'
+        if: matrix.os == 'windows-latest'
         run: zig-out/bin/zentropy.exe ./testdata/random.file
