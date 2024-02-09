@@ -27,3 +27,10 @@ So far, it's only been tested on:
 | x86_64  | linux   |
 | x86_64  | mac os  |
 
+
+# Roadmap
+
+Some things on the roadmap / to-do list when I have some time:
+
+- [ ] support wasm
+- [ ] JSON output
