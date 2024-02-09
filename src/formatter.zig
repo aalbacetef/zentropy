@@ -7,9 +7,9 @@ const sufEntry = struct { limit: f64, suffix: []const u8 };
 
 const table: [4]sufEntry = .{
     .{ .limit = 1 << 10, .suffix = "bytes" },
-    .{ .limit = 1 << 20, .suffix = "K" },
-    .{ .limit = 1 << 30, .suffix = "M" },
-    .{ .limit = 1 << 40, .suffix = "G" },
+    .{ .limit = 1 << 20, .suffix = "Kib" },
+    .{ .limit = 1 << 30, .suffix = "Mib" },
+    .{ .limit = 1 << 40, .suffix = "Gib" },
 };
 
 fn findSuffix(v: f64) usize {
@@ -55,9 +55,13 @@ const BannerOptions = struct {
     box: Box = .{},
 };
 
+// Logger is a utility struct for printing a banner and aligned results.
+// The field_width is set to the size of the largest field, which determines
+// the alignment.
 pub const Logger = struct {
     allocator: std.mem.Allocator,
     add_new_line: bool = true,
+    field_width: usize = 0, // 0 is used to signal ignore
 
     pub fn banner(
         self: Logger,
@@ -111,7 +115,26 @@ pub const Logger = struct {
     }
 
     pub fn printFloat(self: Logger, w: anytype, name: []const u8, v: f64, suffix: []const u8) !void {
-        try std.fmt.format(w, "{s} => {d:.2} {s}", .{ name, v, suffix });
+        var field_width = name.len;
+        if (self.field_width > 0) {
+            field_width = self.field_width;
+        }
+
+        var field = try self.allocator.alloc(u8, field_width);
+        defer self.allocator.free(field);
+
+        @memcpy(field[0..name.len], name);
+
+        // pad with ' ' on the right if needed
+        const diff = field_width - name.len;
+        if (diff > 0) {
+            var s = field[name.len..];
+            for (0..diff) |k| {
+                s[k] = ' ';
+            }
+        }
+
+        try std.fmt.format(w, "{s} => {d:.2} {s}", .{ field, v, suffix });
         self.appendNewline(w);
     }
 
