@@ -14,11 +14,27 @@ pub fn main() !void {
         }
     }
 
+    run(allocator) catch |err| {
+        switch (err) {
+            error.FileNotFound => std.debug.print("error: file not found\n\n", .{}),
+            else => {},
+        }
+
+        printHelp();
+    };
+}
+
+fn run(allocator: std.mem.Allocator) !void {
     const first_arg = try util.firstArg(allocator) orelse {
         std.debug.print("please provide a path\n", .{});
         return;
     };
     defer allocator.free(first_arg);
+
+    if (isHelp(first_arg)) {
+        printHelp();
+        return;
+    }
 
     var streamer = try util.FileStreamer.init(.{
         .fpath = first_arg,
@@ -38,15 +54,49 @@ pub fn main() !void {
     const possible = fsize * ent;
     const compr = 100.0 * (1.0 - ent);
 
-    const logger = formatter.Logger{ .allocator = allocator };
+    const largest_field = "possible file size";
+    const logger = formatter.Logger{
+        .allocator = allocator,
+        .field_width = largest_field.len,
+    };
 
     const w = std.io.getStdOut().writer();
+
     try logger.banner(w, "zentropy", .{});
 
     try logger.printFloat(w, "entropy", ent, "nats");
     try logger.printValue(w, "file size", fsize);
     try logger.printValue(w, "possible file size", possible);
     try logger.printFloat(w, "compression", compr, "%");
+}
+
+fn isHelp(s: []u8) bool {
+    const possible = [_][]const u8{
+        "-h",
+        "--help",
+        "help",
+    };
+
+    for (possible) |v| {
+        if (std.mem.eql(u8, s, v)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+fn printHelp() void {
+    std.debug.print(
+        \\ zentropy
+        \\
+        \\     Calculate Shannon Entropy for a file 
+        \\
+        \\ Usage
+        \\
+        \\     zentropy FILE
+        \\ 
+    , .{});
 }
 
 const sizes = enum(u64) {
