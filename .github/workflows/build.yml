@@ -1,0 +1,34 @@
+
+name: Build
+on:
+  pull_request:
+    - master 
+
+permissions:
+  contents: read 
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: goto-bus-stop/setup-zig@v2
+
+      # debug build so we can ensure safety checks are done 
+      - run: zig build -Doptimize=Debug
+
+      - name: run against testdata
+        if: ${{ matrix.os }} != 'windows-latest'
+        run: zig-out/bin/zentropy ./testdata/random.file
+
+      - name: run against testdata
+        if: ${{ matrix.os }} == 'windows-latest'
+        run: zig-out/bin/zentropy.exe ./testdata/random.file
