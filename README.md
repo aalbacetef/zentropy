@@ -21,7 +21,6 @@ Get a precompiled binary from the release page or build your own with zig!
 
 So far, it's only been tested on:
 
-|---------|---------|
 |  arch   |    os   |
 |---------|---------|
 | x86_64  | windows |
