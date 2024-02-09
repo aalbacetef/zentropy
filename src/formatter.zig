@@ -7,9 +7,9 @@ const sufEntry = struct { limit: f64, suffix: []const u8 };
 
 const table: [4]sufEntry = .{
     .{ .limit = 1 << 10, .suffix = "bytes" },
-    .{ .limit = 1 << 20, .suffix = "K" },
-    .{ .limit = 1 << 30, .suffix = "M" },
-    .{ .limit = 1 << 40, .suffix = "G" },
+    .{ .limit = 1 << 20, .suffix = "Kib" },
+    .{ .limit = 1 << 30, .suffix = "Mib" },
+    .{ .limit = 1 << 40, .suffix = "Gib" },
 };
 
 fn findSuffix(v: f64) usize {
