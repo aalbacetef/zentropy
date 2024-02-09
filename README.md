@@ -34,3 +34,4 @@ Some things on the roadmap / to-do list when I have some time:
 
 - [ ] support wasm
 - [ ] JSON output
+- [ ] wrap in a Docker container
