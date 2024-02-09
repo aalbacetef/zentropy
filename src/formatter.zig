@@ -61,7 +61,7 @@ const BannerOptions = struct {
 pub const Logger = struct {
     allocator: std.mem.Allocator,
     add_new_line: bool = true,
-    field_width: usize,
+    field_width: usize = 0, // 0 is used to signal ignore
 
     pub fn banner(
         self: Logger,
@@ -115,13 +115,18 @@ pub const Logger = struct {
     }
 
     pub fn printFloat(self: Logger, w: anytype, name: []const u8, v: f64, suffix: []const u8) !void {
-        var field = try self.allocator.alloc(u8, self.field_width);
+        var field_width = name.len;
+        if (self.field_width > 0) {
+            field_width = self.field_width;
+        }
+
+        var field = try self.allocator.alloc(u8, field_width);
         defer self.allocator.free(field);
 
         @memcpy(field[0..name.len], name);
 
         // pad with ' ' on the right if needed
-        const diff = self.field_width - name.len;
+        const diff = field_width - name.len;
         if (diff > 0) {
             var s = field[name.len..];
             for (0..diff) |k| {
