@@ -32,7 +32,17 @@ compression        => 45.49 %
 
 # Installation 
 
-Get a precompiled binary from the release page or build your own with zig!
+Get a precompiled binary from the [release page](https://github.com/aalbacetef/zentropy/releases) or build your own with zig!
+
+### Special steps 
+
+On both Linux and Mac, don't forget to `chmod +x /path/to/binary`. 
+
+Mac might yell at you for trying to run the binary, in which case, just run:
+
+```bash
+$ xattr -d com.apple.quarantine /path/to/binary
+```
 
 ### Supported platforms
 
