@@ -24,7 +24,7 @@ $ zentropy ./build.zig
 ------------
 entropy            => 0.55 nats
 entropy (bits)     => 4.36 bits
-file size          => 1.59 K
+file size          => 1.59 Kib
 possible file size => 887.35 bytes
 compression        => 45.49 %
 
