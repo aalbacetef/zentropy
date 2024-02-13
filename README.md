@@ -62,3 +62,4 @@ Some things on the roadmap / to-do list when I have some time:
 - [ ] support wasm
 - [ ] JSON output
 - [ ] wrap in a Docker container
+- [ ] allow setting chunk size via env var or cli flag
