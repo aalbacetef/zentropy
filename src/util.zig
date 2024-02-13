@@ -33,20 +33,15 @@ test "it reads the first arg" {
     try std.testing.expectEqualStrings(want, first_arg);
 }
 
-// absFilePath
-// TODO: support expanding path (e.g: ~/), don't fall over when path doesn't exist.
-// TODO: should only allocate a new buffer if size is smaller.
 // caller must free returned slice.
 fn absPath(allocator: std.mem.Allocator, fpath: []const u8) ![]u8 {
     var buf = try allocator.alloc(u8, std.fs.MAX_PATH_BYTES);
     defer allocator.free(buf);
 
     const abspath = try std.fs.realpath(fpath, buf[0..std.fs.MAX_PATH_BYTES]);
-    var fpath_buf = try allocator.alloc(u8, abspath.len);
+    const fpath_buf = try allocator.alloc(u8, abspath.len);
 
-    for (0.., abspath) |k, byte| {
-        fpath_buf[k] = byte;
-    }
+    @memcpy(fpath_buf, abspath);
 
     return fpath_buf;
 }
