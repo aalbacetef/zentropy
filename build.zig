@@ -1,18 +1,5 @@
 const std = @import("std");
 
-const lib = struct {
-    name: []const u8,
-    path: []const u8,
-    with_tests: bool = true,
-};
-
-const libs: []const lib = &.{
-    .{ .name = "entropy", .path = "src/entropy.zig" },
-    .{ .name = "formatter", .path = "src/formatter.zig" },
-    .{ .name = "strings", .path = "src/strings.zig" },
-    .{ .name = "util", .path = "src/util.zig" },
-};
-
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -36,25 +23,21 @@ pub fn build(b: *std.Build) void {
     const run_exe_unit_tests = b.addRunArtifact(exe_unit_tests);
     test_step.dependOn(&run_exe_unit_tests.step);
 
+    const libs = [_][]const u8{
+        "src/entropy.zig",
+        "src/formatter.zig",
+        "src/strings.zig",
+        "src/util.zig",
+    };
+
     for (libs) |l| {
-        b.installArtifact(b.addStaticLibrary(.{
-            .name = l.name,
-            .root_source_file = .{
-                .path = l.path,
-            },
+        const t = b.addTest(.{
+            .root_source_file = .{ .path = l },
             .target = target,
             .optimize = optimize,
-        }));
+        });
 
-        if (l.with_tests) {
-            const t = b.addTest(.{
-                .root_source_file = .{ .path = l.path },
-                .target = target,
-                .optimize = optimize,
-            });
-
-            const r = b.addRunArtifact(t);
-            test_step.dependOn(&r.step);
-        }
+        const r = b.addRunArtifact(t);
+        test_step.dependOn(&r.step);
     }
 }
