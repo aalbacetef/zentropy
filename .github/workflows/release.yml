@@ -1,0 +1,21 @@
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: goto-bus-stop/setup-zig@v2
+      - run: make release
