@@ -21,8 +21,8 @@ build-releases: build-release-linux build-release-macos build-release-windows
 release: build-releases 
 	gh release create $$(git describe --abbrev=0) \
 		--generate-notes \
-    zentropy-linux \
-    zentropy-macos \
-    zentropy-windows.exe
+		zentropy-linux \
+		zentropy-macos \
+		zentropy-windows.exe
 
 .PHONY: build build-release-linux build-release-macos build-release-windows build-releases release test
