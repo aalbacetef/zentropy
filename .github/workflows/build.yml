@@ -23,7 +23,7 @@ jobs:
       - uses: goto-bus-stop/setup-zig@v2
 
       # debug build so we can ensure safety checks are done 
-      - run: zig build -Doptimize=Debug
+      - run: make build
 
       - name: run against testdata
         if: matrix.os != 'windows-latest'
