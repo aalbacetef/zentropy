@@ -1,0 +1,30 @@
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+      - uses: goto-bus-stop/setup-zig@v2
+      - run: |
+          zig build-exe -fstrip -O ReleaseFast -target x86_64-linux-gnu --name zentropy-linux  ./src/main.zig
+          zig build-exe -fstrip -O ReleaseFast -target x86_64-macos --name zentropy-macos  ./src/main.zig
+          zig build-exe -fstrip -O ReleaseFast -target x86_64-windows-gnu --name zentropy-windows  ./src/main.zig
+      - run: |
+          gh release create $(git describe --abbrev=0) \
+            --generate-notes \
+            zentropy-linux \
+            zentropy-macos \
+            zentropy-windows.exe
