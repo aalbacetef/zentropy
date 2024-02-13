@@ -13,7 +13,7 @@ build-release-linux:
 build-release-macos: 
 	zig build-exe -fstrip -target x86_64-macos -O ReleaseFast --name zentropy-macos ./src/main.zig
 
-build-release-linux: 
+build-release-windows: 
 	zig build-exe -fstrip -target x86_64-windows-gnu -O ReleaseFast --name zentropy-windows ./src/main.zig
 
 build-releases: build-release-linux build-release-macos build-release-windows 
