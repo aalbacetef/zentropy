@@ -21,6 +21,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: goto-bus-stop/setup-zig@v2
+        with:
+          version: '0.13.0'
 
       # debug build so we can ensure safety checks are done 
       - run: make build
